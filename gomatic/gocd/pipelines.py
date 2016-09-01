@@ -220,6 +220,7 @@ class Stage(CommonEqualityMixin):
         result['name'] = self.name
         result['type'] = ('manual' if self.has_manual_approval
                           else 'on_success')
+        result['approval_authorization_user'] = self.approval_authorization_user
         result['fetch_materials'] = self.fetch_materials
         result['clean_working_dir'] = self.clean_working_dir
         result['never_cleanup_artifacts'] = self.never_cleanup_artifacts()
@@ -281,11 +282,26 @@ class Stage(CommonEqualityMixin):
     def never_cleanup_artifacts(self):
         return PossiblyMissingElement(self.element).has_attribute('artifactCleanupProhibited', "true")
 
-
-
     @property
     def has_manual_approval(self):
         return PossiblyMissingElement(self.element).possibly_missing_child("approval").has_attribute("type", "manual")
+
+    @property
+    def approval_authorization_user(self):
+        auth_node = PossiblyMissingElement(self.element).\
+            possibly_missing_child("approval").\
+            findall('authorization')
+        if auth_node:
+            user_node = auth_node[0].findall('user')
+            return user_node[0].text if user_node else None
+
+    @approval_authorization_user.setter
+    def approval_authorization_user(self, value):
+        approval_type = 'manual' if self.has_manual_approval else 'success'
+        Ensurance(self.element).\
+            ensure_child_with_attribute("approval", 'type', approval_type).\
+            ensure_child('authorization').\
+            ensure_child('user').set_text(value)
 
     @property
     def fetch_materials(self):
