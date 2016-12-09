@@ -8,6 +8,7 @@ import requests
 from decimal import Decimal
 
 from gomatic.gocd.pipelines import Pipeline, PipelineGroup
+from gomatic.gocd.repositories import GenericArtifactoryRepository
 from gomatic.gocd.agents import Agent
 from gomatic.xml_operations import Ensurance, PossiblyMissingElement, move_all_to_end, prettify
 
@@ -62,10 +63,14 @@ class GoCdConfigurator(object):
         return self.__current_config_response()[0]
 
     def __current_config_response(self):
-        response = self.__host_rest_client.get("/go/admin/restful/configuration/file/GET/xml")
+        config_url = "/go/admin/restful/configuration/file/GET/xml"
+        response = self.__host_rest_client.get(config_url)
+        if response.status_code != 200:
+            raise Exception("Failed to get {} status {}\n:{}".format(config_url, response.status_code, response.text))
         return response.text, response.headers['x-cruise-config-md5']
 
     def reorder_elements_to_please_go(self):
+        move_all_to_end(self.__xml_root, 'repositories')
         move_all_to_end(self.__xml_root, 'pipelines')
         move_all_to_end(self.__xml_root, 'templates')
         move_all_to_end(self.__xml_root, 'environments')
@@ -132,6 +137,26 @@ class GoCdConfigurator(object):
 
     def __server_element_ensurance(self):
         return Ensurance(self.__xml_root).ensure_child('server')
+
+    @property
+    def generic_artifactory_repositories(self):
+        return [GenericArtifactoryRepository(e) for e in self.__xml_root.findall('repositories')[0].findall('repository')]
+
+    def ensure_generic_artifactory_repository(self, repository_name):
+        repository_element = Ensurance(self.__xml_root).ensure_child('repositories').ensure_child_with_attribute("repository", "name", repository_name)
+        repository = GenericArtifactoryRepository(repository_element.element)
+        return repository
+
+    def ensure_removal_generic_artifactory_repository(self, repository_name):
+        matching = [r for r in self.generic_artifactory_repositories if r.name == repository_name]
+        for repository in matching:
+            self.__xml_root.findall('repositories')[0].remove(repository.element)
+        return self
+
+    def ensure_replacement_generic_artifactory_repository(self, repository_name):
+        repository = self.ensure_generic_artifactory_repository(repository_name)
+        repository.make_empty()
+        return repository
 
     @property
     def pipeline_groups(self):

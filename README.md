@@ -50,6 +50,13 @@ We believe it works for the following versions (as indicated by `integration_tes
 * 16.2.1-3027
 * 16.3.0-3183
 * 16.4.0-3223
+* 16.5.0-3305
+* 16.6.0-3590
+* 16.7.0-3819
+* 16.8.0-3929
+* 16.9.0-4001
+* 16.10.0-4131
+* 16.11.0-4185
 
 ## Install
 
@@ -61,7 +68,7 @@ which will install the [gomatic package](https://pypi.python.org/pypi/gomatic/).
 
 ## Usage
 
-We won't document all of the options. Most of the behaviour is covered by [unit tests](https://github.com/SpringerSBM/gomatic/blob/master/gomatic/go_cd_configurator_test.py), so look at them.
+We won't document all of the options. Most of the behaviour is covered by [unit tests](https://github.com/SpringerSBM/gomatic/blob/master/tests/go_cd_configurator_test.py), so look at them.
 
 ### Dry run
 
