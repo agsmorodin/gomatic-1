@@ -373,6 +373,7 @@ class Pipeline(CommonEqualityMixin):
             if self.has_timer:
                 result['cron_timer_run_only_on_new_material'] = \
                     self.timer_triggers_only_on_changes
+            result['packages'] = []
             result['materials'] = [m.to_dict(ordered=ordered)
                                    for m in self.materials]
             result['environment_variables'] = self.environment_variables
