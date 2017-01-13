@@ -3,6 +3,7 @@ from gomatic.mixins import CommonEqualityMixin
 from gomatic.xml_operations import ignore_patterns_in
 from collections import OrderedDict
 
+
 def Materials(element):
     if element.tag == "git":
         branch = element.attrib.get('branch', None)
@@ -18,6 +19,11 @@ def Materials(element):
     if element.tag == "pipeline":
         material_name = element.attrib.get('materialName', None)
         return PipelineMaterial(element.attrib['pipelineName'], element.attrib['stageName'], material_name)
+
+    if element.tag == "package":
+        package_id = element.attrib.get('ref', None)
+        return PackageMaterial(package_id=package_id)
+
     raise RuntimeError("don't know of material matching " + ET.tostring(element, 'utf-8'))
 
 
@@ -119,7 +125,7 @@ class GitMaterial(CommonEqualityMixin):
         if not self.__polling:
             polling_part = ' autoUpdate="false"'
 
-        destination_directory_part= ''
+        destination_directory_part = ''
         if self.__destination_directory:
             destination_directory_part = ' dest="%s"' % self.__destination_directory
 
@@ -159,7 +165,6 @@ class PipelineMaterial(CommonEqualityMixin):
         result['stage_name'] = self.__stage_name
         return result
 
-
     is_git = False
 
     def append_to(self, element):
@@ -170,3 +175,43 @@ class PipelineMaterial(CommonEqualityMixin):
                 '<pipeline pipelineName="%s" stageName="%s" materialName="%s"/>' % (self.__pipeline_name, self.__stage_name, self.__material_name))
 
         element.append(new_element)
+
+
+class PackageMaterial(CommonEqualityMixin):
+    def __init__(self, package_id):
+        self.__package_id = package_id
+
+    @property
+    def package_id(self):
+        return self.__package_id
+
+    def __repr__(self):
+        return 'PackageMaterial(package_id="%s")' % self.package_id
+
+    is_git = False
+
+    def to_dict(self, ordered=False):
+        if ordered:
+            result = OrderedDict()
+        else:
+            result = {}
+        result['type'] = 'package'
+        result['ref'] = self.package_id
+        return result
+
+    def append_to(self, element):
+        new_element = ET.fromstring('<package ref="%s" />' % self.package_id)
+
+        element.append(new_element)
+
+    @staticmethod
+    def of(repository_name=None, package_name=None, configurator=None):
+        config = ET.fromstring(configurator.config)
+        package = config.find('./repositories/repository[@name="%s"]/packages/package[@name="%s"]' % (
+            repository_name, package_name))
+
+        if package is None:
+            raise RuntimeError(
+                'Package: "%s" not found in the repository: "%s"' % (package_name, repository_name))
+
+        return PackageMaterial(package_id=package.attrib["id"])
