@@ -51,6 +51,8 @@ class GenericArtifactoryRepositoryPackage(CommonEqualityMixin):
             'repository_id': self.repository_id,
             'package_path': self.package_path,
             'package_id': self.package_id
+	    'poll_version_from': self.poll_version_from,
+            'poll_version_to': self.poll_version_to
         }
         return result
 
@@ -91,10 +93,28 @@ class GenericArtifactoryRepositoryPackage(CommonEqualityMixin):
     def package_path(self):
         return self.get_configuration_property('PACKAGE_PATH')
 
-    @package_path.setter
+   @package_path.setter
     def package_path(self, value):
         self.remove_configuration_property('PACKAGE_PATH')
         self.set_configuration_property('PACKAGE_PATH', value)
+
+    @property
+    def poll_version_from(self):
+	return self.get_configuration_property('POLL_VERSION_FROM')
+	
+    @poll_version_from.setter
+    def poll_version_from(self, value):
+        self.remove_configuration_property('POLL_VERSION_FROM')
+        self.set_configuration_property('POLL_VERSION_FROM', value)
+
+    @property
+    def poll_version_to(self):
+        return self.get_configuration_property('POLL_VERSION_TO')
+
+    @poll_version_to.setter
+    def poll_version_from(self, value):
+        self.remove_configuration_property('POLL_VERSION_TO')
+        self.set_configuration_property('POLL_VERSION_TO', value)
 
     @property
     def package_id(self):
