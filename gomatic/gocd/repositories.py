@@ -93,7 +93,7 @@ class GenericArtifactoryRepositoryPackage(CommonEqualityMixin):
     def package_path(self):
         return self.get_configuration_property('PACKAGE_PATH')
 
-   @package_path.setter
+    @package_path.setter
     def package_path(self, value):
         self.remove_configuration_property('PACKAGE_PATH')
         self.set_configuration_property('PACKAGE_PATH', value)
