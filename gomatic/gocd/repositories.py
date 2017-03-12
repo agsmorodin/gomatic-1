@@ -112,7 +112,7 @@ class GenericArtifactoryRepositoryPackage(CommonEqualityMixin):
         return self.get_configuration_property('POLL_VERSION_TO')
 
     @poll_version_to.setter
-    def poll_version_from(self, value):
+    def poll_version_to(self, value):
         self.remove_configuration_property('POLL_VERSION_TO')
         self.set_configuration_property('POLL_VERSION_TO', value)
 
