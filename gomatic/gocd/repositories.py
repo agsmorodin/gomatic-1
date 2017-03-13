@@ -51,7 +51,7 @@ class GenericArtifactoryRepositoryPackage(CommonEqualityMixin):
             'repository_id': self.repository_id,
             'package_path': self.package_path,
             'package_id': self.package_id,
-	    'poll_version_from': self.poll_version_from,
+            'poll_version_from': self.poll_version_from,
             'poll_version_to': self.poll_version_to
         }
         return result
